@@ -11,7 +11,7 @@
     "build": "tsc -p tsconfig.json",
     "collector:up": "docker compose up -d --wait",
     "collector:down": "docker compose down -v",
-    "test:e2e": "node dist/test/run-e2e.js",
+    "test:e2e": "node --test dist/test/*.test.js",
     "test:e2e:full": "pnpm collector:up && pnpm build && pnpm test:e2e; code=$?; pnpm collector:down; exit $code"
   },
   "dependencies": {
@@ -20,7 +20,7 @@
     "@nestjs/platform-express": "^10.4.0",
     "@opentelemetry/api": "^1.9.0",
     "reflect-metadata": "^0.2.2",
-    "resilient-otel": "^0.1.1",
+    "resilient-otel": "^0.1.2",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
