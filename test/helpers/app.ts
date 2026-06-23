@@ -18,6 +18,7 @@ export interface BootedApp {
 export async function bootApp(
   config: ResilientOtelConfig,
   controllers: Type[],
+  opts: { shutdownHooks?: boolean } = {},
 ): Promise<BootedApp> {
   @Module({
     imports: [ObservabilityModule.forRoot(config)],
@@ -28,7 +29,7 @@ export async function bootApp(
   const app: INestApplication = await NestFactory.create(ScenarioModule, {
     logger: false,
   });
-  app.enableShutdownHooks();
+  if (opts.shutdownHooks !== false) app.enableShutdownHooks();
   await app.listen(0);
   const url = await app.getUrl();
   let closed = false;
