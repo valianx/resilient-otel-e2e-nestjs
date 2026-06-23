@@ -1,0 +1,16 @@
+# Local OpenTelemetry Collector for the e2e suite.
+# Start: pnpm collector:up   (docker compose up -d --wait)
+# Stop:  pnpm collector:down (docker compose down -v)
+# The app exports OTLP to localhost:4318 (http) / :4317 (grpc); the collector
+# writes everything it receives to ./collector/out/telemetry.json.
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.119.0
+    container_name: resilient-otel-e2e-collector
+    command: ['--config=/etc/otelcol-contrib/config.yaml']
+    volumes:
+      - ./collector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+      - ./collector/out:/out
+    ports:
+      - '4317:4317'
+      - '4318:4318'

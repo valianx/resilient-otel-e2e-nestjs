@@ -1,0 +1,50 @@
+name: e2e
+
+# Boots a NestJS app consuming the PUBLISHED resilient-otel against a real
+# OpenTelemetry Collector (run via docker compose so the file exporter can
+# bind-mount its output). Asserts spans/logs arrive with PII/secrets redacted.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    name: e2e (NestJS → real OTel Collector)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v6
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build (typecheck against the published .d.ts)
+        run: pnpm build
+
+      - name: Start OTel Collector
+        run: |
+          mkdir -p collector/out
+          docker compose up -d --wait
+
+      - name: Run e2e
+        run: pnpm test:e2e
+        env:
+          OTEL_EXPORTER_OTLP_ENDPOINT: http://localhost:4318
+
+      - name: Collector logs (on failure)
+        if: failure()
+        run: docker compose logs otel-collector
+
+      - name: Stop collector
+        if: always()
+        run: docker compose down -v

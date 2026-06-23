@@ -1,0 +1,31 @@
+# OpenTelemetry Collector config for the e2e suite.
+# Receives OTLP (http + grpc) from the NestJS app and writes every received
+# span/log/metric to a JSON file the test inspects.
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+exporters:
+  file:
+    path: /out/telemetry.json
+  debug:
+    verbosity: detailed
+
+service:
+  telemetry:
+    logs:
+      level: info
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [file, debug]
+    logs:
+      receivers: [otlp]
+      exporters: [file, debug]
+    metrics:
+      receivers: [otlp]
+      exporters: [file, debug]
