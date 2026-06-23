@@ -34,6 +34,9 @@ jobs:
       - name: Start OTel Collector
         run: |
           mkdir -p collector/out
+          # The collector image runs as a non-root user; make the bind-mounted
+          # output dir writable so its file exporter can create telemetry.json.
+          chmod -R 777 collector/out
           docker compose up -d --wait
 
       - name: Run e2e
